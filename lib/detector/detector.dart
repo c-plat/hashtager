@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 /// DataModel to explain the unit of word in detection system
-class Detection extends Comparable<Detection> {
+class Detection implements Comparable<Detection> {
   Detection({required this.range, this.style, this.emojiStartPoint});
 
   final TextRange range;
@@ -24,36 +24,27 @@ class Detector {
 
   Detector({this.textStyle, this.decoratedStyle, this.decorateAtSign = false});
 
-  List<Detection> _getSourceDetections(
-      List<RegExpMatch> tags, String copiedText) {
+  List<Detection> _getSourceDetections(List<RegExpMatch> tags, String copiedText) {
     TextRange? previousItem;
     final result = <Detection>[];
     for (var tag in tags) {
       ///Add untagged content
       if (previousItem == null) {
         if (tag.start > 0) {
-          result.add(Detection(
-              range: TextRange(start: 0, end: tag.start), style: textStyle));
+          result.add(Detection(range: TextRange(start: 0, end: tag.start), style: textStyle));
         }
       } else {
-        result.add(Detection(
-            range: TextRange(start: previousItem.end, end: tag.start),
-            style: textStyle));
+        result.add(Detection(range: TextRange(start: previousItem.end, end: tag.start), style: textStyle));
       }
 
       ///Add tagged content
-      result.add(Detection(
-          range: TextRange(start: tag.start, end: tag.end),
-          style: decoratedStyle));
+      result.add(Detection(range: TextRange(start: tag.start, end: tag.end), style: decoratedStyle));
       previousItem = TextRange(start: tag.start, end: tag.end);
     }
 
     ///Add remaining untagged content
     if (result.last.range.end < copiedText.length) {
-      result.add(Detection(
-          range:
-              TextRange(start: result.last.range.end, end: copiedText.length),
-          style: textStyle));
+      result.add(Detection(range: TextRange(start: result.last.range.end, end: copiedText.length), style: textStyle));
     }
     return result;
   }
@@ -62,15 +53,11 @@ class Detector {
   List<Detection> getDetections(String copiedText) {
     var regExp;
     if (this.decorateAtSign == true) {
-      regExp = RegExp(
-          r'''[@|#][^\s!@#$%^&*()=+،\/,\[{\]};:'"?><]+''',
-          multiLine: true);
-    }else{
-      regExp = RegExp(
-          r'''#[^\s!@#$%^&*()=+،\/,\[{\]};:'"?><]+''',
-          multiLine: true);
+      regExp = RegExp(r'''[@|#][^\s!@#$%^&*()=+،\/,\[{\]};:'"?><]+''', multiLine: true);
+    } else {
+      regExp = RegExp(r'''#[^\s!@#$%^&*()=+،\/,\[{\]};:'"?><]+''', multiLine: true);
     }
-    
+
     final tags = regExp.allMatches(copiedText).toList();
     if (tags.isEmpty) {
       return [];
